@@ -1,4 +1,6 @@
+import { validateAuthentication } from '../middleware/auth';
 import { Task } from '../models/Task';
+import { GraphQLContext } from 'src/types/GraphQLContext';
 
 export const taskResolvers = {
   Query: {
@@ -6,6 +8,9 @@ export const taskResolvers = {
     getTasks: async () => await Task.findAll(),
   },
   Mutation: {
-    createTask: async (_: any, args: any) => await Task.create(args),
+    createTask: async (_: any, args: any, context: GraphQLContext) => {
+     validateAuthentication(context)
+     return await Task.create(args)
+    },
   },
 };

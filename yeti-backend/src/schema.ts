@@ -42,13 +42,15 @@ const typeDefs = gql`
   }
 
   type Query {
-    getTask(id: ID!): Task
-    getTasks: [Task]
+    login(username: String!, password: String!): String!
     getUser(id: ID!): User
     getUsers: [User]
+    getTask(id: ID!): Task
+    getTasks: [Task]
   }
 
   type Mutation {
+    register(input: CreateUserInput!): User!
     createTask(userId: ID!, title: String, description: String, dueDate: String, priority: Int, status: String): Task
     createUser(input: CreateUserInput!): User!
     deleteUser(userId: ID!): User!
