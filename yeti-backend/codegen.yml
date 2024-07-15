@@ -1,0 +1,8 @@
+schema: "./src/schema.ts"
+documents: null
+generates:
+  ./src/types/generated.ts:
+    plugins:
+      - "typescript"
+      - "typescript-operations"
+      - "typescript-resolvers"
