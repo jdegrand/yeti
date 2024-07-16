@@ -57,6 +57,13 @@ export class User extends Model {
     defaultValue: DataType.NOW,
   })
   updatedAt!: Date;
+
+  @Column({
+    type: DataType.BOOLEAN,
+    allowNull: true,
+    defaultValue: false,
+  })
+  isAdmin?: boolean;
 }
 
 export default User;

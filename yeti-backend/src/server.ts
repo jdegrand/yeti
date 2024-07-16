@@ -3,22 +3,24 @@ import express from 'express';
 import { ApolloServer } from 'apollo-server-express';
 import { schema } from './schema';
 import { sequelize } from './config/sequelize';
-import { authMiddleware } from './middleware/auth';
-import { GraphQLContext } from './types/GraphQLContext';
+import { context } from './types/GraphQLContext';
+import { applyMiddleware } from 'graphql-middleware'
+import { permissions } from './middleware/permissions';
+
 
 const startServer = async () => {
   const app = express() as any;
 
-  // Apply authentication middleware to all routes
-  app.use(authMiddleware);
+  const schemaWithMiddleware = applyMiddleware(schema, permissions)
 
   const server = new ApolloServer({
-    schema,
-    context: ({ req }): GraphQLContext => {
-      return {
-          userId: (req as any).user?.userId,
-      };
-  },
+    schema: schemaWithMiddleware,
+    context,
+    debug: false,
+    formatError: (error) => {
+      const { locations, ...customError } = error
+      return customError;
+    },
   });
 
   await server.start();

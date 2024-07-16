@@ -10,7 +10,10 @@ A simple task manager to brush up on my full-stack skills
 * Languages: TypeScript, HTML/CSS/SCSS
 
 # Back-end Technologies
-* API: Node.js with Express and Apollo Server for GraphQL queries/mutations
+* API:
+  - Node.js with Express/GraphQL
+  - Apollo Server for GraphQL queries/mutations
+  - GraphQL Shield for query/mutation/type permissions
 * Authentication: User authentication with JWTs
 * Database: Postgres
 * ORM: Sequelize

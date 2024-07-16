@@ -1,26 +1,48 @@
-import { CreateUserInput, User } from 'src/types/generated';
+import { CreateUserInput } from 'src/types/generated';
 import { UserService } from '../services/UserService';
 import { GraphQLContext } from 'src/types/GraphQLContext';
-import { validateAuthentication } from '../middleware/auth';
+import { throwYetiError } from '../types/YetiError';
 
 const userService = new UserService();
 
 export const userResolvers = {
   Query: {
     login: async (_: unknown, { username, password }: { username: string, password: string }) => {
-      return await userService.login(username, password);
+      try {
+        return await userService.login(username, password);
+      } catch (error) {
+        throwYetiError(error);
+      }
     },
     getUser: async (_: unknown, { id }: { id: string }) => {
-      return await userService.getUserById(id);
+      try {
+        return await userService.getUserById(id);
+      } catch (error) {
+        throwYetiError(error);
+      }
     },
     getUsers: async (_0: unknown, _1: unknown, context: GraphQLContext) => {
-      validateAuthentication(context);
-      return await userService.getAllUsers();
+      try {
+        return await userService.getAllUsers();
+      } catch (error) {
+        throwYetiError(error);
+      }
     },
   },
   Mutation: {
-    register: async (_: any, { input }: { input: CreateUserInput }) => {
-      return await userService.register(input);
+    register: async (_: unknown, { input }: { input: CreateUserInput }) => {
+      try {
+        return await userService.register(input);
+      } catch (error) {
+        throwYetiError(error);
+      }
+    },
+    deleteUser: async (_: unknown,  { id }: { id: string }) => {
+      try {
+        return await userService.deleteUser(id);
+      } catch (error) {
+        throwYetiError(error);
+      }
     },
   },
 };

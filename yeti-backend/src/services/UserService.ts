@@ -1,25 +1,28 @@
-import { AuthenticationError } from 'apollo-server-express';
 import { User as UserModel } from '../models/User';
 import { CreateUserInput, User } from 'src/types/generated';
 import bcrypt from 'bcryptjs';
 import { generateToken } from '../middleware/auth';
+import { AuthenticationError, UserInputError } from '../types/YetiError';
 
 export class UserService {
-  private mapUserToGraphQL(user: UserModel): User {
+  private mapUserToGraphQL(user: Omit<UserModel, 'password'>): User {
+    const {
+      first_name: firstName,
+      last_name: lastName,
+      ...restUser
+    } = user;
+
     return {
-      id: user.id,
-      username: user.username,
-      email: user.email,
-      firstName: user.first_name,
-      lastName: user.last_name,
-      createdAt: user.createdAt,
-      updatedAt: user.updatedAt,
-    };
+      ...restUser,
+      firstName,
+      lastName,
+    } as User;
   }
 
   async login(username: string, password: string): Promise<string> {
     const user = await UserModel.findOne({
       where: { username },
+      raw: true,
     })
 
     if (!user) {
@@ -38,6 +41,7 @@ export class UserService {
   async getUserById(id: string): Promise<User | null> {
     const user = await UserModel.findByPk(id, {
       attributes: { exclude: ['password'] },
+      raw: true,
     });
     return user ? this.mapUserToGraphQL(user) : null
   }
@@ -45,6 +49,7 @@ export class UserService {
   async getAllUsers(): Promise<User[]> {
     const users = await UserModel.findAll({
       attributes: { exclude: ['password'] },
+      raw: true,
     });
     return users.map(user => this.mapUserToGraphQL(user));
   }
@@ -61,22 +66,30 @@ export class UserService {
         email,
         first_name: firstName,
         last_name: lastName,
+      }, {
+        raw: true,
       });
 
-      const { password: omitPassword, ...createdUser } = newUser.toJSON()
+      const { password: omitPassword, ...createdUser } = newUser;
 
-      return this.mapUserToGraphQL(createdUser);
+      return this.mapUserToGraphQL(createdUser as UserModel);
     } catch (err) {
       console.error('Error signing up:', err);
       throw new Error('Failed to sign up');
     }
   }
 
-  async deleteUser(userId: number): Promise<User> {
-    const userToDelete = await UserModel.findByPk(userId);
+  async deleteUser(id: string): Promise<User> {
+    const userToDelete = await UserModel.findByPk(id, {
+      attributes: { exclude: ['password'] }
+    });
 
     if (!userToDelete) {
-      throw new Error(`User with id ${userId} not found`);
+      throw new UserInputError(`User with id '${id}' not found`);
+    }
+
+    if (userToDelete.isAdmin) {
+      throw new UserInputError(`User with id '${id}' is an admin. You can not delete admins at this time`);
     }
 
     await userToDelete.destroy();

@@ -29,8 +29,9 @@ const typeDefs = gql`
     email: String
     firstName: String
     lastName: String
-    createdAt: DateTime
-    updatedAt: DateTime
+    createdAt: DateTime!
+    updatedAt: DateTime!
+    isAdmin: Boolean
   }
 
   input CreateUserInput {
@@ -53,7 +54,7 @@ const typeDefs = gql`
     register(input: CreateUserInput!): User!
     createTask(userId: ID!, title: String, description: String, dueDate: String, priority: Int, status: String): Task
     createUser(input: CreateUserInput!): User!
-    deleteUser(userId: ID!): User!
+    deleteUser(id: ID!): User!
   }
 `;
 
